@@ -1,0 +1,75 @@
+;
+;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+;
+;
+;               Author  :       ENES MERCAN     ~      TURKEY
+;               Date    :       16/04/2021
+;               MCU     :       MSP430G2553
+;
+;               Project :       blinky led
+;               Version :       1.5
+;       
+;
+;               Description :
+;                       Blinking the on-board LED at P1.0 with some
+;                       delay periodically
+;
+;
+;
+;
+;*************************......LIBRARIES......****************************
+
+#include "msp430.h"                     ; #define controlled include file
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+        ORG     0F800h                  ; Program Reset
+       
+;;;;;;;;;;;;;;;;;;;;;;;;;.... INITIALIZATION(S) ....;;;;;;;;;;;;;;;;;;;;;;;;
+     
+RESET         MOV.W    #0280h,SP               ; Initialize stackpointer
+              MOV.W    #WDTPW+WDTHOLD,&WDTCTL  ; Stop watchdog timer
+
+
+              BIC.B     #01h, &P1REN              ; Disable pullup/pulldown res's
+  
+              BIC.B     #01h, &P1SEL              ; i/o function selected
+              BIC.B     #01h, &P1SEL2             ; i/o function selected
+
+              BIS.B     #001h, &P1DIR             ; Set P1.0 as Output
+              
+ 
+;;;;;;;;;;;;;;;;;;;;;;;;; .... MAIN .... ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+MAIN_LOOP
+
+        XOR.B   #001h,&P1OUT           ; Toggle P1.0
+   
+   
+        ; DELAY section
+        MOV.W   #50000,R15     
+L1      DEC.W   R15
+        JNZ     L1
+        
+        
+        JMP     MAIN_LOOP
+
+
+        ORG     0FFFEh
+        DW      RESET
+        
+        
+        END
+        
+        
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;       Interrupt Service Routine
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;       Interrupt Service Routine
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
