@@ -1,0 +1,98 @@
+;
+;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+;
+;
+;               Author  :       ENES MERCAN     ~      TURKEY
+;               Date    :       16/04/2021
+;               MCU     :       MSP430G2553
+;
+;               Project :       button led
+;               Version :       1.0
+;       
+;
+;               Description :
+;                       when you push the button attached to P2.3
+;                   the LED array attached through P1.0 to P1.5 
+;                   will blink and show the button-push count
+;
+;
+;
+;
+;*************************......LIBRARIES......****************************
+
+#include "msp430.h"                     ; #define controlled include file
+
+#define         COUNTER         0x200
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+        ORG     0F800h                  ; Program Reset
+       
+;;;;;;;;;;;;;;;;;;;;;;;;;.... INITIALIZATION(S) ....;;;;;;;;;;;;;;;;;;;;;;;;
+     
+RESET         MOV.W    #0280h,SP               ; Initialize stackpointer
+              MOV.W    #WDTPW+WDTHOLD,&WDTCTL  ; Stop watchdog timer
+
+              ; Init P1.0 ~ P1.5
+              BIC.B    #0xFF,&P1SEL      ; I/O function is selected
+              BIC.B    #0xFF,&P1SEL2     ; I/O function is selected
+              BIC.B    #0xFF,&P1REN      ; Disable pullup/pulldown res's
+              BIS.B    #0xFF,&P1DIR      ; terminals are output
+
+              ; Init P2.3
+              BIC.B    #0x08,&P2SEL      ; I/O function is selected for P2.3
+              BIC.B    #0x08,&P2SEL2     ; I/O function is selected for P2.3
+              ;BIS.B    #0x08,&P2REN      ; Pullup res is enabled for P2.3
+        BIC.B    #0xFF,&P2REN
+              BIC.B    #0x08,&P2DIR      ; P2.3 is input
+              
+ 
+;;;;;;;;;;;;;;;;;;;;;;;;; .... MAIN .... ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+MAIN_LOOP
+
+               BIC.B    #0xFF,&P1OUT
+     
+     
+TEST   
+               BIC.W    #7,SR
+               CMP.B    #8,&P2IN
+               JZ       DELAY
+               JMP      TEST
+       
+DELAY          MOV.W    #64000,R15
+               BIC.W    #7,SR
+L1             DEC.W    R15
+               JNZ       L1
+               
+BLINK
+               INC.B    P1OUT
+               
+DELAY2         MOV.W    #64000,R15
+               BIC.W    #7,SR
+L2             DEC.W    R15
+               JNZ      L2
+               
+               JMP      TEST
+ 
+ 
+
+               
+ 
+               ORG     0FFFEh
+               DW      RESET
+               
+        
+       END
+        
+        
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;       Interrupt Vectors
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;       Interrupt Service Routine
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
